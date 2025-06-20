@@ -2,35 +2,41 @@ import { askLLM } from '@/lib/llm';
 import { searchReddit, webSearch } from '@/lib/search';
 
 export async function POST(req) {
-  const { messages } = await req.json();
+  const { messages, classifierHint } = await req.json();
 
-  // Get the most recent user question for context-based search
+  // Get the most recent user message for targeted search
   const lastUserMessage = messages.filter(m => m.role === 'user').pop()?.content || '';
 
+  // Perform tool lookups
   const redditResults = await searchReddit(lastUserMessage);
   const webResults = await webSearch(lastUserMessage);
 
+  // System prompt guiding the assistant
   const systemMessage = {
     role: 'system',
     content: `
-You are Restobot — a helpful and friendly restaurant recommendation assistant.
+You are Restobot — a helpful, friendly restaurant recommendation assistant.
 
 You can:
-- Recommend restaurants
-- Suggest dishes
-- Compare places to eat
-- Provide directions
-- Handle follow-up questions using chat memory
+- Suggest restaurants and places to eat
+- Recommend dishes at specific restaurants
+- Compare two restaurants
+- Help with directions to restaurants
+- Answer follow-up questions using chat memory
+- Greet the user and explain your capabilities
 
-If the user greets you (e.g. "hi", "hello", "what can you do?"), respond with a friendly welcome and explain briefly what you can help with. Encourage them to ask about food or restaurants.
+The user's last message was classified as: ${classifierHint ? 'restaurant-related' : 'possibly off-topic'}.
+Use this as a soft hint only. Always prioritize conversation context.
 
-You can also incorporate the following research into your answers:
+If the user says something like "restaurants near me", let them know you can't access their current location and ask them to specify a location like a city or neighborhood.
+
+Use these tools:
 - Web Search Results: ${webResults}
 - Reddit Reviews: ${redditResults}
 
-If the user asks vague questions like "what to order there?", resolve "there" from earlier conversation.If not clear, ask for clarification.
+If a message is vague (e.g., "what to order there"), use prior messages to infer meaning.
 
-Keep responses friendly, conversational, and helpful.
+Keep your tone friendly, concise, and conversational.
     `.trim()
   };
 

@@ -39,13 +39,9 @@ export default function Home() {
     console.log('%c[Restobot Classifier Debug]', 'color: orange; font-weight: bold;');
     console.log('Prompt sent to OpenAI:\n', debug.prompt);
     console.log('Model response:\n', debug.modelResponse);
+    console.log('Classifier Output:', isRestaurantRelated);
 
-    if (!isRestaurantRelated) {
-      setToastMessage('Please ask me something about restaurants 😊');
-      setTimeout(() => setToastMessage(''), 4000);
-      return;
-    }
-
+    // Proceed regardless of classification
     const newMessages: Message[] = [...messages, { role: 'user', content: query }];
     setMessages(newMessages);
     setQuery('');
@@ -53,7 +49,7 @@ export default function Home() {
 
     const res = await fetch('/api/chat', {
       method: 'POST',
-      body: JSON.stringify({ messages: newMessages }),
+      body: JSON.stringify({ messages: newMessages, classifierHint: isRestaurantRelated }),
       headers: { 'Content-Type': 'application/json' },
     });
 

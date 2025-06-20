@@ -13,23 +13,26 @@ export async function POST(req) {
   Respond with ONLY "YES" or "NO" to indicate whether the following user message should be handled by the assistant.
   
   Say "YES" if the message is:
-  - A restaurant question (recommendations, food, directions, etc.)
-  - A greeting like "hi", "hello", "hey", or "what can you do?"
+  - About food, restaurants, meals, or dishes
+  - Asking for directions to a restaurant
+  - Greeting the assistant (e.g. "hi", "what can you do")
+  - Comparing multiple restaurants (e.g. "Thai Villa vs Soothr")
   
-  Say "NO" only if it's clearly unrelated to food, restaurants, or starting a conversation.
+  Say "NO" only if the message is clearly unrelated (e.g. physics, photosynthesis, tech).
   
   Examples:
-  "recommend something at Cheesecake Factory" → YES
-  "What should I order at Four Charles?" → YES
-  "How to get to ABC Kitchen?" → YES
-  "Hello" → YES
-  "hi there" → YES
-  "what can you do?" → YES
+  "What should I order at Four Charles?" → YES  
+  "recommend something at Cheesecake Factory" → YES  
+  "hi there" → YES  
+  "What can you do?" → YES  
+  "What is the difference between X and Y?" → YES  
+  "Compare X and Y" → YES  
+  "What is quantum mechanics?" → NO  
   "What is photosynthesis?" → NO
-  "Explain quantum computing" → NO
   
   User message: "${query}"
   `.trim();
+  
   
 
   const completion = await openai.chat.completions.create({
